@@ -13,9 +13,23 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\bot">
+      <UniqueIdentifier>{4533a043-10da-4935-953e-14525885bd3a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
+    <ClInclude Include="..\include\bot\scoring.h">
+      <Filter>Header Files\bot</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\bot\agent.h">
+      <Filter>Header Files\bot</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\bot\common.h">
+      <Filter>Header Files\bot</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
