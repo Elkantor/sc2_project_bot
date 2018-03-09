@@ -16,8 +16,10 @@ int main(int argc, char* argv[]) {
 	};
 	
 
-	sc2_bot::Bot bot;
-	bot._action_game_start = sc2_bot::CreateAction(actions_available, "game_start", 100, function_start);
+	sc2_bot::Bot bot(
+		sc2_bot::CreateAction(actions_available, "game_start", 100, function_start)
+	);
+	//bot._action_game_start = sc2_bot::CreateAction(actions_available, "game_start", 100, function_start);
 	{
 		if (bot._action_game_start.name != "") {
 			std::cout << "[SUCCESS] The action is correctly created." << std::endl;

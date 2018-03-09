@@ -8,6 +8,12 @@ namespace sc2_bot {
 	class Bot : public sc2::Agent {
 	public:
 
+		Bot(sc2_bot::Action& action_game_start)
+			:_action_game_start(action_game_start)
+		{};
+
+		~Bot() {};
+
 		sc2_bot::Action _action_game_start;
 
 		virtual void OnGameStart() final {
