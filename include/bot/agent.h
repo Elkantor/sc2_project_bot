@@ -25,7 +25,11 @@ namespace sc2_bot {
 		}
 
 		virtual void OnStep() final {
-			std::cout << Observation()->GetGameLoop() << std::endl;
+			/*std::cout << Observation()->GetGameLoop() << std::endl;*/
+		}
+
+		virtual void OnGameEnd() final {
+			std::cout << "The game is over." << std::endl;
 		}
 	};
 	

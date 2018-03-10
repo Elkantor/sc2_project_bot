@@ -27,6 +27,12 @@
     <ClInclude Include="..\include\bot\common.h">
       <Filter>Header Files\bot</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\bot\sc2_bot_functions.h">
+      <Filter>Header Files\bot</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\bot\unit.h">
+      <Filter>Header Files\bot</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\main.cpp">
