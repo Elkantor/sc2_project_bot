@@ -8,28 +8,32 @@ namespace sc2_bot {
 	class Bot : public sc2::Agent {
 	public:
 
-		Bot(sc2_bot::Action& action_game_start)
-			:_action_game_start(action_game_start)
+		Bot(std::map<sc2_bot::ActionName, sc2_bot::Action>& actions_available)
+			:_actions_available(actions_available)
 		{};
 
 		~Bot() {};
 
-		sc2_bot::Action _action_game_start;
+		std::map<sc2_bot::ActionName, sc2_bot::Action> _actions_available;
 
 		virtual void OnGameStart() final {
-			std::cout << "Hello, World!" << std::endl;
-			std::cout << "score : " << _action_game_start.score << std::endl;
-			_action_game_start.do_action(_action_game_start);
-			std::cout << "score modified, after action is done: " << _action_game_start.score << std::endl;
-			std::cin.get();
+			std::cout << "[SUCCESS] Game started !" << std::endl;
+
+			Action* action = &_actions_available.find(sc2_bot::ActionName::GAME_START)->second;
+			std::map<ActionName, int>* actions_impacted = &action->actions_impacted;
+			action->do_action(*action, *actions_impacted, _actions_available);
+			
 		}
 
 		virtual void OnStep() final {
-			/*std::cout << Observation()->GetGameLoop() << std::endl;*/
+			sc2_bot::StartNextAction(_actions_available);
 		}
 
 		virtual void OnGameEnd() final {
 			std::cout << "The game is over." << std::endl;
+
+			Action action = _actions_available.find(sc2_bot::ActionName::GAME_END)->second;
+			action.do_action(action, action.actions_impacted, _actions_available);
 		}
 	};
 	

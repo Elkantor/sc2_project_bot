@@ -8,27 +8,34 @@ int main(int argc, char* argv[]) {
     sc2::Coordinator coordinator;
     coordinator.LoadSettings(argc, argv);
 
-	std::vector<sc2_bot::Action> actions_available;
-
-	auto function_start = [](sc2_bot::Action& current_action) {
-		current_action.score += 10;
-		return true;
-	};
+	// Create the map of the available actions
+	std::map<sc2_bot::ActionName, sc2_bot::Action> actions_available;
 	
-
-	sc2_bot::Bot bot(
-		sc2_bot::CreateAction(actions_available, "game_start", 100, function_start)
-	);
-	{
-		if (bot._action_game_start.name != "") {
-			std::cout << "[SUCCESS] The action is correctly created." << std::endl;
-		}
-		else {
-			std::cout <<
-				"[ERROR] Action is not created, because an action with the same name already exists in the available actions list."
-				<< std::endl;
-		}
+	if(!sc2_bot::CheckActionExists(actions_available, sc2_bot::ActionName::GAME_START)) {
+		int score = 100;
+		int score_modificator = -100;
+		actions_available.insert(std::pair<sc2_bot::ActionName, sc2_bot::Action>(
+			sc2_bot::ActionName::GAME_START, sc2_bot::Action{ score, score_modificator, sc2_bot::function_start, std::map<sc2_bot::ActionName, int>() }
+		));
 	}
+
+	if (!sc2_bot::CheckActionExists(actions_available, sc2_bot::ActionName::BUILD_SCV)) {
+		int score = 90;
+		int score_modificator = -20;
+		actions_available.insert(std::pair<sc2_bot::ActionName, sc2_bot::Action>(
+			sc2_bot::ActionName::BUILD_SCV, sc2_bot::Action{ score, score_modificator, sc2_bot::function_buildsvc, std::map<sc2_bot::ActionName, int>() }
+		));
+	}
+
+	// Insert a map of actions to be modified when the actions are called.
+	// The first parameter is the ActionName of the action, to find it, and the second is the score modificator.
+	actions_available.begin()->second.actions_impacted.insert(
+		std::pair<sc2_bot::ActionName, int>(sc2_bot::ActionName::BUILD_SCV, -10)
+	
+	);
+
+	// Create the AI Agent (the global manager)
+	sc2_bot::Bot bot(actions_available);
 
     coordinator.SetParticipants({
         sc2::CreateParticipant(sc2::Race::Terran, &bot),
@@ -39,6 +46,7 @@ int main(int argc, char* argv[]) {
     coordinator.StartGame(sc2::kMapBelShirVestigeLE);
 
     while (coordinator.Update()) {
+		
     }
 
     return 0;
