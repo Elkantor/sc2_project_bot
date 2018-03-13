@@ -133,11 +133,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\include\bot\agent.h" />
+    <ClInclude Include="..\include\bot\sc2_bot_agent.h" />
     <ClInclude Include="..\include\bot\common.h" />
+    <ClInclude Include="..\include\bot\sc2_bot_actions.h" />
     <ClInclude Include="..\include\bot\sc2_bot_functions.h" />
-    <ClInclude Include="..\include\bot\scoring.h" />
-    <ClInclude Include="..\include\bot\unit.h" />
+    <ClInclude Include="..\include\bot\sc2_bot_scoring.h" />
+    <ClInclude Include="..\include\bot\sc2_bot_unit.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\main.cpp" />

@@ -1,8 +1,8 @@
-#pragma once
-
 #include "bot/common.h"
-#include "bot/scoring.h"
-#include "bot/agent.h"
+#include "bot/sc2_bot_agent.h"
+#include "bot/sc2_bot_scoring.h"
+#include "bot/sc2_bot_actions.h"
+
 
 int main(int argc, char* argv[]) {
     sc2::Coordinator coordinator;
@@ -15,7 +15,7 @@ int main(int argc, char* argv[]) {
 		int score = 100;
 		int score_modificator = -100;
 		actions_available.insert(std::pair<sc2_bot::ActionName, sc2_bot::Action>(
-			sc2_bot::ActionName::GAME_START, sc2_bot::Action{ score, score_modificator, sc2_bot::function_start, std::map<sc2_bot::ActionName, int>() }
+			sc2_bot::ActionName::GAME_START, sc2_bot::Action{ score, score_modificator, sc2_bot::actions::function_start, std::map<sc2_bot::ActionName, int>() }
 		));
 	}
 
@@ -23,7 +23,7 @@ int main(int argc, char* argv[]) {
 		int score = 90;
 		int score_modificator = -20;
 		actions_available.insert(std::pair<sc2_bot::ActionName, sc2_bot::Action>(
-			sc2_bot::ActionName::BUILD_SCV, sc2_bot::Action{ score, score_modificator, sc2_bot::function_buildsvc, std::map<sc2_bot::ActionName, int>() }
+			sc2_bot::ActionName::BUILD_SCV, sc2_bot::Action{ score, score_modificator, sc2_bot::actions::function_buildsvc, std::map<sc2_bot::ActionName, int>() }
 		));
 	}
 
@@ -31,7 +31,6 @@ int main(int argc, char* argv[]) {
 	// The first parameter is the ActionName of the action, to find it, and the second is the score modificator.
 	actions_available.begin()->second.actions_impacted.insert(
 		std::pair<sc2_bot::ActionName, int>(sc2_bot::ActionName::BUILD_SCV, -10)
-	
 	);
 
 	// Create the AI Agent (the global manager)

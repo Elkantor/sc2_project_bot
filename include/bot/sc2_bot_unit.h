@@ -9,7 +9,6 @@ namespace sc2_bot {
 	public:
 
 		
-
 	};
 
 

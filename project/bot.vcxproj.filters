@@ -18,19 +18,22 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\include\bot\scoring.h">
-      <Filter>Header Files\bot</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\bot\agent.h">
-      <Filter>Header Files\bot</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\bot\common.h">
       <Filter>Header Files\bot</Filter>
     </ClInclude>
     <ClInclude Include="..\include\bot\sc2_bot_functions.h">
       <Filter>Header Files\bot</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\bot\unit.h">
+    <ClInclude Include="..\include\bot\sc2_bot_actions.h">
+      <Filter>Header Files\bot</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\bot\sc2_bot_agent.h">
+      <Filter>Header Files\bot</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\bot\sc2_bot_scoring.h">
+      <Filter>Header Files\bot</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\bot\sc2_bot_unit.h">
       <Filter>Header Files\bot</Filter>
     </ClInclude>
   </ItemGroup>
