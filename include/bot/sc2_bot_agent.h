@@ -16,6 +16,8 @@ namespace sc2_bot {
 
 		// Properties
 		int max_worker_count_ = 70;
+		sc2::Point3D staging_location_;
+		std::vector<sc2::Point3D> expansions_;
 		std::map<sc2_bot::ActionName, sc2_bot::Action> _actions_available;
 
 		// Methods

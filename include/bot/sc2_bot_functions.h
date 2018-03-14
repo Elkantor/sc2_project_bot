@@ -20,6 +20,21 @@ namespace sc2_bot {
 			}
 		}
 	};
+
+	struct IsStructure {
+		IsStructure(const sc2::ObservationInterface* obs) : observation_(obs) {};
+		bool operator()(const sc2::Unit& unit) {
+			auto& attributes = observation_->GetUnitTypeData().at(unit.unit_type).attributes;
+			bool is_structure = false;
+			for (const auto& attribute : attributes) {
+				if (attribute == sc2::Attribute::Structure) {
+					is_structure = true;
+				}
+			}
+			return is_structure;
+		}
+		const sc2::ObservationInterface* observation_;
+	};
 	
 namespace functions{
 
@@ -70,8 +85,80 @@ namespace functions{
 		return false;
 	}
 
-	bool TryBuildStructure(sc2::AbilityID ability_type_for_structure, sc2::UnitTypeID unit_type = sc2::UNIT_TYPEID::TERRAN_SCV) {
+	bool GetRandomUnit(const sc2::Unit*& unit_out, const sc2::ObservationInterface* observation, sc2::UnitTypeID unit_type) {
+		sc2::Units my_units = observation->GetUnits(sc2::Unit::Alliance::Self);
+		std::random_shuffle(my_units.begin(), my_units.end()); // Doesn't work, or doesn't work well.
+		for (const auto unit : my_units) {
+			if (unit->unit_type == unit_type) {
+				unit_out = unit;
+				return true;
+			}
+		}
 		return false;
+	}
+
+
+	bool TryBuildStructure(sc2::AbilityID ability_type_for_structure, sc2::UnitTypeID unit_type, sc2::Point2D location, sc2_bot::Bot& bot, bool isExpansion = false) {
+		const sc2::ObservationInterface* observation = bot.Observation();
+		sc2::Units workers = observation->GetUnits(sc2::Unit::Alliance::Self, sc2::IsUnit(unit_type));
+
+		//if we have no workers Don't build
+		if (workers.empty()) {
+			return false;
+		}
+
+		// Check to see if there is already a worker heading out to build it
+		for (const auto& worker : workers) {
+			for (const auto& order : worker->orders) {
+				if (order.ability_id == ability_type_for_structure) {
+					return false;
+				}
+			}
+		}
+
+		// If no worker is already building one, get a random worker to build one
+		const sc2::Unit* unit = GetRandomEntry(workers);
+		sc2::AvailableAbilities abilities = bot.Query()->GetAbilitiesForUnit(unit);
+		float dist = bot.Query()->PathingDistance(unit, location);
+		// Check to see if unit can make it there
+		if (bot.Query()->PathingDistance(unit, location) < 0.1f) {
+			return false;
+		}
+		if (!isExpansion) {
+			for (const auto& expansion : bot.expansions_) {
+				if (Distance2D(location, sc2::Point2D(expansion.x, expansion.y)) < 7) {
+					return false;
+				}
+			}
+		}
+		// Check to see if unit can build there
+		if (bot.Query()->Placement(ability_type_for_structure, location)) {
+			bot.Actions()->UnitCommand(unit, ability_type_for_structure, location);
+			return true;
+		}
+		return false;
+	}
+
+	bool TryBuildStructureRandom(sc2::AbilityID ability_type_for_structure, sc2::UnitTypeID unit_type, sc2_bot::Bot& bot) {
+		float rx = sc2::GetRandomScalar();
+		float ry = sc2::GetRandomScalar();
+		sc2::Point2D build_location = sc2:: Point2D(bot.staging_location_.x + rx * 25, bot.staging_location_.y + ry * 25);
+
+		sc2::Units units = bot.Observation()->GetUnits(sc2::Unit::Self, IsStructure(bot.Observation()));
+		float distance = std::numeric_limits<float>::max();
+		for (const auto& u : units) {
+			if (u->unit_type == sc2::UNIT_TYPEID::TERRAN_SUPPLYDEPOTLOWERED) {
+				continue;
+			}
+			float d = Distance2D(u->pos, build_location);
+			if (d < distance) {
+				distance = d;
+			}
+		}
+		if (distance < 6) {
+			return false;
+		}
+		return TryBuildStructure(ability_type_for_structure, unit_type, build_location, bot);
 	}
 
 	bool TryBuildSupplyDepot() {
