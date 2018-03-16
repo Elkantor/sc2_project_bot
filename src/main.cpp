@@ -8,32 +8,55 @@ int main(int argc, char* argv[]) {
     sc2::Coordinator coordinator;
     coordinator.LoadSettings(argc, argv);
 
-	// Create the map of the available actions
+	/*******************************************/
+	/* Create the map of the available actions */
+	/*******************************************/
 	std::map<sc2_bot::ActionName, sc2_bot::Action> actions_available;
+
 	
 	if(!sc2_bot::CheckActionExists(actions_available, sc2_bot::ActionName::GAME_START)) {
 		int score = 100;
 		int score_modificator = -100;
 		actions_available.insert(std::pair<sc2_bot::ActionName, sc2_bot::Action>(
-			sc2_bot::ActionName::GAME_START, sc2_bot::Action{ score, score_modificator, sc2_bot::actions::function_start, std::map<sc2_bot::ActionName, int>() }
+			sc2_bot::ActionName::GAME_START, 
+			sc2_bot::Action { 
+				score, 
+				score_modificator, 
+				sc2_bot::actions::function_start
+			}
 		));
 	}
 
-	if (!sc2_bot::CheckActionExists(actions_available, sc2_bot::ActionName::BUILD_SCV)) {
+	if (!sc2_bot::CheckActionExists(actions_available, sc2_bot::ActionName::MINE)) {
 		int score = 90;
+		int score_modificator = -10;
+		actions_available.insert(std::pair<sc2_bot::ActionName, sc2_bot::Action>(
+			sc2_bot::ActionName::MINE, 
+			sc2_bot::Action { 
+				score, 
+				score_modificator, 
+				sc2_bot::actions::function_mine
+			}
+		));
+	}
+
+	if (!sc2_bot::CheckActionExists(actions_available, sc2_bot::ActionName::BUILD_BARRACKS)) {
+		int score = 50;
 		int score_modificator = -20;
 		actions_available.insert(std::pair<sc2_bot::ActionName, sc2_bot::Action>(
-			sc2_bot::ActionName::BUILD_SCV, sc2_bot::Action{ score, score_modificator, sc2_bot::actions::function_buildsvc, std::map<sc2_bot::ActionName, int>() }
+			sc2_bot::ActionName::BUILD_BARRACKS, 
+			sc2_bot::Action { 
+				score, 
+				score_modificator, 
+				sc2_bot::actions::function_build_barracks
+			}
 		));
 	}
+	
 
-	// Insert a map of actions to be modified when the actions are called.
-	// The first parameter is the ActionName of the action, to find it, and the second is the score modificator.
-	actions_available.begin()->second.actions_impacted.insert(
-		std::pair<sc2_bot::ActionName, int>(sc2_bot::ActionName::BUILD_SCV, -10)
-	);
-
-	// Create the AI Agent (the global manager)
+	/********************************************/
+	/* Create the AI Bot Agent (the global manager) */
+	/********************************************/
 	sc2_bot::Bot bot(actions_available);
 
     coordinator.SetParticipants({

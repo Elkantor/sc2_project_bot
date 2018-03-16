@@ -8,7 +8,8 @@ namespace sc2_bot {
 		GAME_START,
 		GAME_END,
 		BUILD_SCV,
-
+		BUILD_BARRACKS,
+		MINE
 	};
 
 	struct Action {
@@ -16,12 +17,9 @@ namespace sc2_bot {
 		int score_modificator = -1;
 		std::function<bool(
 			Action& current_action, 
-			std::map<ActionName, int>& actions_impacted, 
-			std::map<sc2_bot::ActionName, 
-			sc2_bot::Action>& actions_available, 
+			std::map<sc2_bot::ActionName, sc2_bot::Action>& actions_available, 
 			class Bot& bot
 		)> do_action;
-		std::map<ActionName, int> actions_impacted;
 	};
 
 	bool CheckActionExists(std::map<sc2_bot::ActionName, sc2_bot::Action>& actions_available, ActionName name) {
@@ -46,8 +44,7 @@ namespace sc2_bot {
 			}
 		});
 		Action* action_selected = &actions_available.at(action_to_launch);
-		std::map<ActionName, int>* actions_impacted = &action_selected->actions_impacted;
-		action_selected->do_action(*action_selected, *actions_impacted, actions_available, bot);
+		action_selected->do_action(*action_selected, actions_available, bot);
 		return true;
 	}
 

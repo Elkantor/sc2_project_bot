@@ -9,7 +9,7 @@ namespace sc2_bot {
 	public:
 
 		Bot(std::map<sc2_bot::ActionName, sc2_bot::Action>& actions_available)
-			:_actions_available(actions_available)
+			:actions_available_(actions_available)
 		{};
 
 		~Bot() {};
@@ -18,25 +18,25 @@ namespace sc2_bot {
 		int max_worker_count_ = 70;
 		sc2::Point3D staging_location_;
 		std::vector<sc2::Point3D> expansions_;
-		std::map<sc2_bot::ActionName, sc2_bot::Action> _actions_available;
+		std::map<sc2_bot::ActionName, sc2_bot::Action> actions_available_;
 
 		// Methods
 		virtual void OnGameStart() final {
 			std::cout << "[SUCCESS] Game started !" << std::endl;
-			Action* action = &_actions_available.find(sc2_bot::ActionName::GAME_START)->second;
-			std::map<ActionName, int>* actions_impacted = &action->actions_impacted;
-			action->do_action(*action, *actions_impacted, _actions_available, *this);
+			Action* action = &actions_available_.find(sc2_bot::ActionName::GAME_START)->second;
+			action->do_action(*action, actions_available_, *this);
 			
 		}
 
 		virtual void OnStep() final {
-			sc2_bot::StartNextAction(_actions_available, *this);
+			sc2_bot::StartNextAction(actions_available_, *this);
+			std::cout << Observation()->GetMinerals() << std::endl;
 		}
 
 		virtual void OnGameEnd() final {
 			std::cout << "The game is over." << std::endl;
-			Action action = _actions_available.find(sc2_bot::ActionName::GAME_END)->second;
-			action.do_action(action, action.actions_impacted, _actions_available, *this);
+			Action action = actions_available_.find(sc2_bot::ActionName::GAME_END)->second;
+			action.do_action(action, actions_available_, *this);
 		}
 	};
 	
