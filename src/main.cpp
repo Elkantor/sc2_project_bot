@@ -67,9 +67,9 @@ int main(int argc, char* argv[]) {
 	}
 	
 
-	/********************************************/
+	/************************************************/
 	/* Create the AI Bot Agent (the global manager) */
-	/********************************************/
+	/************************************************/
 	sc2_bot::Bot bot(actions_available);
 
     coordinator.SetParticipants({
@@ -79,6 +79,7 @@ int main(int argc, char* argv[]) {
 
     coordinator.LaunchStarcraft();
     coordinator.StartGame(sc2::kMapBelShirVestigeLE);
+
 
     while (coordinator.Update()) {
 		
