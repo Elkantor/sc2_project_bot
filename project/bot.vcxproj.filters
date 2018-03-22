@@ -33,9 +33,6 @@
     <ClInclude Include="..\include\bot\sc2_bot_scoring.h">
       <Filter>Header Files\bot</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\bot\sc2_bot_unit.h">
-      <Filter>Header Files\bot</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\main.cpp">

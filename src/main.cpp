@@ -16,7 +16,7 @@ int main(int argc, char* argv[]) {
 	
 	if(!sc2_bot::CheckActionExists(actions_available, sc2_bot::ActionName::GAME_START)) {
 		int score = 100;
-		int score_modificator = -100;
+		int score_modificator = 100;
 		actions_available.insert(std::pair<sc2_bot::ActionName, sc2_bot::Action>(
 			sc2_bot::ActionName::GAME_START, 
 			sc2_bot::Action { 
@@ -29,7 +29,7 @@ int main(int argc, char* argv[]) {
 
 	if (!sc2_bot::CheckActionExists(actions_available, sc2_bot::ActionName::MINE)) {
 		int score = 90;
-		int score_modificator = -10;
+		int score_modificator = 5;
 		actions_available.insert(std::pair<sc2_bot::ActionName, sc2_bot::Action>(
 			sc2_bot::ActionName::MINE, 
 			sc2_bot::Action { 
@@ -40,9 +40,22 @@ int main(int argc, char* argv[]) {
 		));
 	}
 
+	if (!sc2_bot::CheckActionExists(actions_available, sc2_bot::ActionName::BUILD_SUPPLY_DEPOT)) {
+		int score = 51;
+		int score_modificator = 5;
+		actions_available.insert(std::pair<sc2_bot::ActionName, sc2_bot::Action>(
+			sc2_bot::ActionName::BUILD_SUPPLY_DEPOT,
+			sc2_bot::Action{
+				score,
+				score_modificator,
+				sc2_bot::actions::function_build_supply_depot
+			}
+		));
+	}
+
 	if (!sc2_bot::CheckActionExists(actions_available, sc2_bot::ActionName::BUILD_BARRACKS)) {
 		int score = 50;
-		int score_modificator = -20;
+		int score_modificator = 5;
 		actions_available.insert(std::pair<sc2_bot::ActionName, sc2_bot::Action>(
 			sc2_bot::ActionName::BUILD_BARRACKS, 
 			sc2_bot::Action { 

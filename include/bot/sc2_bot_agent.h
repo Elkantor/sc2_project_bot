@@ -20,6 +20,8 @@ namespace sc2_bot {
 		std::vector<sc2::Point3D> expansions_;
 		std::map<sc2_bot::ActionName, sc2_bot::Action> actions_available_;
 
+		int count_supply_depot = 0;
+
 		// Methods
 		virtual void OnGameStart() final {
 			std::cout << "[SUCCESS] Game started !" << std::endl;
