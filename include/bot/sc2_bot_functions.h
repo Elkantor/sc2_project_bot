@@ -5,6 +5,10 @@
 
 namespace sc2_bot { 
 
+	/**************/
+	/* Structures */
+	/**************/
+
 	struct IsTownHall {
 		bool operator()(const sc2::Unit& unit) {
 			switch (unit.unit_type.ToType()) {
@@ -35,8 +39,33 @@ namespace sc2_bot {
 		}
 		const sc2::ObservationInterface* observation_;
 	};
+
+namespace thread_events {
+
+	/********************/
+	/* Thread functions */
+	/********************/
+
+	void BuildingSupplyDepot(const sc2_bot::Bot& bot, const sc2::Unit* unit) {
+		std::this_thread::sleep_for(std::chrono::seconds(6));
+		while (unit->orders.at(0).ability_id != sc2::ABILITY_ID::BUILD_SUPPLYDEPOT) {}
+		while (unit->build_progress < 1.0f) {}
+		std::cout << "Supply depot is correclty builded." << std::endl;
+	}
+}// namespace thread_events
 	
 namespace functions{
+
+	/*******************************************/
+	/* Toolbox functions to manage the actions */
+	/*******************************************/
+
+	sc2::Point2D GetRandomLocationNextUnit(const sc2_bot::Bot& bot, const sc2::Unit* unit) {
+		float rx = sc2::GetRandomScalar();
+		float ry = sc2::GetRandomScalar();
+		sc2::Point2D location = sc2::Point2D(unit->pos.x + rx * 15, unit->pos.y + ry * 15);
+		return location;
+	}
 
 	//An estimate of how many workers we should have based on what buildings we have
 	int GetExpectedWorkers(sc2::UNIT_TYPEID vespene_building_type, const Bot& bot) {
@@ -61,26 +90,6 @@ namespace functions{
 		return expected_workers;
 	}
 
-	const sc2::Unit* FindNearestMineralPatch(const sc2::Point2D& start, const Bot& bot) {
-		sc2::Units units = bot.Observation()->GetUnits(sc2::Unit::Alliance::Neutral);
-		float distance = std::numeric_limits<float>::max();
-		const sc2::Unit* target = nullptr;
-		for (const auto& u : units) {
-			if (u->unit_type == sc2::UNIT_TYPEID::NEUTRAL_MINERALFIELD) {
-				float d = DistanceSquared2D(u->pos, start);
-				if (d < distance) {
-					distance = d;
-					target = u;
-				}
-			}
-		}
-		//If we never found one return false;
-		if (distance == std::numeric_limits<float>::max()) {
-			return target;
-		}
-		return target;
-	}
-
 	bool FindEnemyPosition(sc2::Point2D& target_pos) {
 		return false;
 	}
@@ -97,10 +106,32 @@ namespace functions{
 		return false;
 	}
 
+	const sc2::Unit* FindNearestMineralPatch(const sc2::Point2D& start, const sc2::ObservationInterface* observation) {
+		sc2::Units units = observation->GetUnits(sc2::Unit::Alliance::Neutral);
+		float distance = std::numeric_limits<float>::max();
+		const sc2::Unit* target = nullptr;
+		for (auto* u : units) {
+			if (u->unit_type == sc2::UNIT_TYPEID::NEUTRAL_MINERALFIELD) {
+				float d = DistanceSquared2D(u->pos, start);
+				if (d < distance) {
+					distance = d;
+					target = u;
+				}
+			}
+		}
+		//If we never found one return nullptr
+		if (distance == std::numeric_limits<float>::max()) {
+			return target;
+		}
+		return target;
+	}
 
-	bool TryBuildStructure(sc2::AbilityID ability_type_for_structure, sc2::UnitTypeID unit_type, sc2::Point2D location, sc2_bot::Bot& bot, bool isExpansion = false) {
+	bool TryBuildStructure(sc2::AbilityID ability_type_for_structure, sc2::UnitTypeID unit_type, sc2_bot::Bot& bot, bool isExpansion = false) {
 		const sc2::ObservationInterface* observation = bot.Observation();
 		sc2::Units workers = observation->GetUnits(sc2::Unit::Alliance::Self, sc2::IsUnit(unit_type));
+	
+		sc2::Units command_centers = observation->GetUnits(sc2::Unit::Alliance::Self, sc2::IsUnit(sc2::UNIT_TYPEID::TERRAN_COMMANDCENTER));
+		sc2::Point2D build_location = GetRandomLocationNextUnit(bot, command_centers.at(0));
 
 		//if we have no workers Don't build
 		if (workers.empty()) {
@@ -119,53 +150,43 @@ namespace functions{
 		// If no worker is already building one, get a random worker to build one
 		const sc2::Unit* unit = GetRandomEntry(workers);
 		sc2::AvailableAbilities abilities = bot.Query()->GetAbilitiesForUnit(unit);
-		float dist = bot.Query()->PathingDistance(unit, location);
-		// Check to see if unit can make it there
-		if (bot.Query()->PathingDistance(unit, location) < 0.1f) {
-			return false;
+		
+		float distance = std::numeric_limits<float>::max();
+		float d = Distance2D(unit->pos, build_location);
+		if (d < distance) {
+			distance = d;
 		}
 		if (!isExpansion) {
 			for (const auto& expansion : bot.expansions_) {
-				if (Distance2D(location, sc2::Point2D(expansion.x, expansion.y)) < 7) {
+				if (Distance2D(build_location, sc2::Point2D(expansion.x, expansion.y)) < 7) {
 					return false;
 				}
 			}
 		}
 		// Check to see if unit can build there
-		if (bot.Query()->Placement(ability_type_for_structure, location)) {
-			bot.Actions()->UnitCommand(unit, ability_type_for_structure, location);
+		bool build_ready = bot.Query()->Placement(ability_type_for_structure, build_location, unit);
+		while (!build_ready) {
+			build_location = GetRandomLocationNextUnit(bot, command_centers.at(0));
+			build_ready = bot.Query()->Placement(ability_type_for_structure, build_location, unit);
+		}
+		if (build_ready) {
+			bot.Actions()->UnitCommand(unit, ability_type_for_structure, build_location);
+			if (ability_type_for_structure == sc2::ABILITY_ID::BUILD_SUPPLYDEPOT) {
+				std::thread(sc2_bot::thread_events::BuildingSupplyDepot, bot, unit).detach();
+				bot.worker_building_structure_.emplace_back(unit);
+			}
 			return true;
 		}
 		return false;
 	}
 
-	bool TryBuildStructureRandom(sc2::AbilityID ability_type_for_structure, sc2::UnitTypeID unit_type, sc2_bot::Bot& bot) {
-		float rx = sc2::GetRandomScalar();
-		float ry = sc2::GetRandomScalar();
-		sc2::Point2D build_location = sc2:: Point2D(bot.staging_location_.x + rx * 25, bot.staging_location_.y + ry * 25);
-
-		sc2::Units units = bot.Observation()->GetUnits(sc2::Unit::Self, IsStructure(bot.Observation()));
-		float distance = std::numeric_limits<float>::max();
-		for (const auto& u : units) {
-			if (u->unit_type == sc2::UNIT_TYPEID::TERRAN_SUPPLYDEPOTLOWERED) {
-				continue;
-			}
-			float d = Distance2D(u->pos, build_location);
-			if (d < distance) {
-				distance = d;
-			}
+	bool TryHarvest(sc2_bot::Bot& bot, const sc2::Unit* unit) {
+		const sc2::Unit* mineral_patch = FindNearestMineralPatch(unit->pos, bot.Observation());
+		if (mineral_patch != nullptr) {
+			bot.Actions()->UnitCommand(unit, sc2::ABILITY_ID::HARVEST_GATHER, mineral_patch->pos);
+			return true;
 		}
-		if (distance < 6) {
-			return false;
-		}
-		return TryBuildStructure(ability_type_for_structure, unit_type, build_location, bot);
-	}
 
-	bool TryBuildSupplyDepot() {
-		return false;
-	}
-
-	bool TryBuildBarracks() {
 		return false;
 	}
 
@@ -180,7 +201,7 @@ namespace functions{
 
 		for (const auto& base : bases) {
 			if (base->unit_type == sc2::UNIT_TYPEID::TERRAN_ORBITALCOMMAND && base->energy > 50) {
-				if (FindNearestMineralPatch(base->pos, bot)) {
+				if (FindNearestMineralPatch(base->pos, bot.Observation())) {
 					bot.Actions()->UnitCommand(base, sc2::ABILITY_ID::EFFECT_CALLDOWNMULE);
 				}
 			}
@@ -240,24 +261,13 @@ namespace functions{
 		return 0;
 	}
 
-	const sc2::Unit* FindNearestMineralPatch(const sc2::Point2D& start, const sc2::ObservationInterface* observation) {
-		sc2::Units units = observation->GetUnits(sc2::Unit::Alliance::Neutral);
-		float distance = std::numeric_limits<float>::max();
-		const sc2::Unit* target = nullptr;
-		for (const auto& u : units) {
-			if (u->unit_type == sc2::UNIT_TYPEID::NEUTRAL_MINERALFIELD) {
-				float d = DistanceSquared2D(u->pos, start);
-				if (d < distance) {
-					distance = d;
-					target = u;
-				}
-			}
+	bool CheckUnitAvailable(const sc2::Unit* unit) {
+		if (unit->orders.size() == 0) {
+			return true;
 		}
-		//If we never found one return nullptr
-		if (distance == std::numeric_limits<float>::max()) {
-			return target;
+		else {
+			return false;
 		}
-		return target;
 	}
 
 } // namespace functions

@@ -19,6 +19,9 @@ namespace sc2_bot {
 		sc2::Point3D staging_location_;
 		std::vector<sc2::Point3D> expansions_;
 		std::map<sc2_bot::ActionName, sc2_bot::Action> actions_available_;
+		std::vector<const sc2::Unit*> worker_building_structure_;
+		int count_supply_depot_ = 0;
+
 
 		// Methods
 		virtual void OnGameStart() final {

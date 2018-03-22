@@ -9,6 +9,7 @@ namespace sc2_bot {
 		GAME_END,
 		BUILD_SCV,
 		BUILD_BARRACKS,
+		BUILD_SUPPLY_DEPOT,
 		MINE
 	};
 
