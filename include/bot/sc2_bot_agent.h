@@ -19,8 +19,9 @@ namespace sc2_bot {
 		sc2::Point3D staging_location_;
 		std::vector<sc2::Point3D> expansions_;
 		std::map<sc2_bot::ActionName, sc2_bot::Action> actions_available_;
-		std::vector<const sc2::Unit*> worker_building_structure_;
+		std::vector<const sc2::Unit*> worker_Idle_;
 		int count_supply_depot_ = 0;
+		int count_wave_ = 0;
 
 
 		// Methods
@@ -33,7 +34,29 @@ namespace sc2_bot {
 
 		virtual void OnStep() final {
 			sc2_bot::StartNextAction(actions_available_, *this);
-			std::cout << Observation()->GetMinerals() << std::endl;
+		}
+
+
+		virtual void OnBuildingConstructionComplete(const sc2::Unit* unit) final {
+			switch (unit->unit_type.ToType()) {
+			case sc2::UNIT_TYPEID::TERRAN_BARRACKS : {
+					Action& action_marine = actions_available_.at(sc2_bot::ActionName::BUILD_MARINE);
+					action_marine.score += 50;
+					break;
+				}
+			}
+			Action& action_reset_worker = actions_available_.at(sc2_bot::ActionName::RESERT_WORKER);
+			action_reset_worker.score += action_reset_worker.score_modificator;
+		}
+		
+		virtual void OnUnitCreated(const sc2::Unit* unit) final {
+			if (unit->unit_type.ToType() == sc2::UNIT_TYPEID::TERRAN_MARINE) {
+				if (Observation()->GetUnits(sc2::Unit::Alliance::Self, sc2::IsUnit(sc2::UNIT_TYPEID::TERRAN_MARINE)).size() >= 10)
+				{
+					Action& action_attack = actions_available_.at(sc2_bot::ActionName::ATTACK);
+					action_attack.score += action_attack.score_modificator;
+				}
+			}
 		}
 
 		virtual void OnGameEnd() final {
