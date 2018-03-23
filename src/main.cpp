@@ -121,9 +121,7 @@ int main(int argc, char* argv[]) {
     coordinator.StartGame(sc2::kMapBelShirVestigeLE);
 
 
-    while (coordinator.Update()) {
-		
-    }
+    while (coordinator.Update()) {}
 
     return 0;
 }

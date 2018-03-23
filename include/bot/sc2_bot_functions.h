@@ -12,15 +12,15 @@ namespace sc2_bot {
 	struct IsTownHall {
 		bool operator()(const sc2::Unit& unit) {
 			switch (unit.unit_type.ToType()) {
-			case sc2::UNIT_TYPEID::ZERG_HATCHERY: return true;
-			case sc2::UNIT_TYPEID::ZERG_LAIR: return true;
-			case sc2::UNIT_TYPEID::ZERG_HIVE: return true;
-			case sc2::UNIT_TYPEID::TERRAN_COMMANDCENTER: return true;
-			case sc2::UNIT_TYPEID::TERRAN_ORBITALCOMMAND: return true;
-			case sc2::UNIT_TYPEID::TERRAN_ORBITALCOMMANDFLYING: return true;
-			case sc2::UNIT_TYPEID::TERRAN_PLANETARYFORTRESS: return true;
-			case sc2::UNIT_TYPEID::PROTOSS_NEXUS: return true;
-			default: return false;
+				case sc2::UNIT_TYPEID::ZERG_HATCHERY: return true;
+				case sc2::UNIT_TYPEID::ZERG_LAIR: return true;
+				case sc2::UNIT_TYPEID::ZERG_HIVE: return true;
+				case sc2::UNIT_TYPEID::TERRAN_COMMANDCENTER: return true;
+				case sc2::UNIT_TYPEID::TERRAN_ORBITALCOMMAND: return true;
+				case sc2::UNIT_TYPEID::TERRAN_ORBITALCOMMANDFLYING: return true;
+				case sc2::UNIT_TYPEID::TERRAN_PLANETARYFORTRESS: return true;
+				case sc2::UNIT_TYPEID::PROTOSS_NEXUS: return true;
+				default: return false;
 			}
 		}
 	};
@@ -157,26 +157,25 @@ namespace functions{
 		}
 		if (build_ready) {
 			bot.Actions()->UnitCommand(unit, ability_type_for_structure, build_location);
-			//std::thread(sc2_bot::thread_events::BuildingSupplyDepot, bot, unit).detach();
 			std::cout << "Adding unit to idle" << std::endl;
-			bot.worker_Idle.push_back(unit);
+			bot.worker_idle_.push_back(unit);
 
 			return true;
 		}
 		return false;
 	}
 
-		bool TryHarvest(sc2_bot::Bot& bot, const sc2::Unit* unit) {
-			const sc2::Unit* mineral_patch = FindNearestMineralPatch(unit->pos, bot.Observation());
-			if (!mineral_patch) {
-				return false;
-			}
-			else {
-				bot.Actions()->UnitCommand(unit, sc2::ABILITY_ID::HARVEST_GATHER, mineral_patch);
-				return true;
-			}
-
+	bool TryHarvest(sc2_bot::Bot& bot, const sc2::Unit* unit) {
+		const sc2::Unit* mineral_patch = FindNearestMineralPatch(unit->pos, bot.Observation());
+		if (!mineral_patch) {
+			return false;
 		}
+		else {
+			bot.Actions()->UnitCommand(unit, sc2::ABILITY_ID::HARVEST_GATHER, mineral_patch);
+			return true;
+		}
+
+	}
 
 	bool TryBuildUnit(sc2::AbilityID ability_type_for_unit, sc2::UnitTypeID unit_type, sc2_bot::Bot& bot) {
 		/*const sc2::ObservationInterface* observation = bot.Observation();
@@ -236,11 +235,11 @@ namespace functions{
 		return true;
 	}
 
-	bool TryAttack(sc2::Units army, sc2_bot::Bot& bot) {
+	bool TryAttack(const sc2::Units* army, sc2_bot::Bot& bot) {
 		const sc2::GameInfo& game_info = bot.Observation()->GetGameInfo();
 		std::vector<sc2::Point2D> enemy_base_locations = game_info.enemy_start_locations;
 		for (sc2::Point2D enemy_base : enemy_base_locations) {
-			for (const sc2::Unit* unit : army) {
+			for (const sc2::Unit* unit : *army) {
 				bot.Actions()->UnitCommand(unit, sc2::ABILITY_ID::ATTACK_ATTACK, enemy_base);
 			}
 		}

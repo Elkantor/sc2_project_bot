@@ -19,7 +19,7 @@ namespace sc2_bot {
 		sc2::Point3D staging_location_;
 		std::vector<sc2::Point3D> expansions_;
 		std::map<sc2_bot::ActionName, sc2_bot::Action> actions_available_;
-		std::vector<const sc2::Unit*> worker_Idle_;
+		std::vector<const sc2::Unit*> worker_idle_;
 		int count_supply_depot_ = 0;
 		int count_wave_ = 0;
 
@@ -61,8 +61,8 @@ namespace sc2_bot {
 
 		virtual void OnGameEnd() final {
 			std::cout << "The game is over." << std::endl;
-			Action action = actions_available_.find(sc2_bot::ActionName::GAME_END)->second;
-			action.do_action(action, actions_available_, *this);
+			//Action action = actions_available_.find(sc2_bot::ActionName::GAME_END)->second;
+			//action.do_action(action, actions_available_, *this);
 		}
 	};
 	

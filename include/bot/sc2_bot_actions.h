@@ -79,11 +79,11 @@ namespace sc2_bot { namespace actions {
 		// Prerequisite
 
 
-		if (!bot.worker_Idle.empty()) {
-			for (const sc2::Unit* unit : bot.worker_Idle) {
+		if (!bot.worker_idle_.empty()) {
+			for (const sc2::Unit* unit : bot.worker_idle_) {
 				functions::TryHarvest(bot, unit);
 			}
-			bot.worker_Idle.clear();
+			bot.worker_idle_.clear();
 		}
 
 		std::cout << "Reseting workers" << std::endl;
@@ -97,7 +97,6 @@ namespace sc2_bot { namespace actions {
 		class Bot& bot
 		) {
 		// Action
-		
 		current_action.score--;
 		return true;
 	};
@@ -169,7 +168,7 @@ namespace sc2_bot { namespace actions {
 			return true;
 		}
 		// Action
-		if (sc2_bot::functions::TryAttack(army, bot)) {
+		if (sc2_bot::functions::TryAttack(&army, bot)) {
 			current_action.score -= current_action.score_modificator;
 		}
 		std::cout << "Attack !" << std::endl;
