@@ -65,6 +65,19 @@ int main(int argc, char* argv[]) {
 			}
 		));
 	}
+
+	if (!sc2_bot::CheckActionExists(actions_available, sc2_bot::ActionName::ATTACK)) {
+		int score = 10;
+		int score_modificator = 100;
+		actions_available.insert(std::pair<sc2_bot::ActionName, sc2_bot::Action>(
+			sc2_bot::ActionName::ATTACK,
+			sc2_bot::Action{
+				score,
+				score_modificator,
+				sc2_bot::actions::function_attack
+			}
+		));
+	}
 	
 	if (!sc2_bot::CheckActionExists(actions_available, sc2_bot::ActionName::RESERT_WORKER)) {
 		int score = 5;
@@ -80,7 +93,7 @@ int main(int argc, char* argv[]) {
 	}
 
 	if (!sc2_bot::CheckActionExists(actions_available, sc2_bot::ActionName::BUILD_MARINE)) {
-		int score = 10;
+		int score = 15;
 		int score_modificator = 10;
 		actions_available.insert(std::pair<sc2_bot::ActionName, sc2_bot::Action>(
 			sc2_bot::ActionName::BUILD_MARINE,
@@ -91,6 +104,8 @@ int main(int argc, char* argv[]) {
 			}
 		));
 	}
+	
+	
 
 	/************************************************/
 	/* Create the AI Bot Agent (the global manager) */

@@ -12,6 +12,7 @@ namespace sc2_bot {
 		BUILD_SUPPLY_DEPOT,
 		BUILD_MARINE,
 		RESERT_WORKER,
+		ATTACK,
 		MINE
 	};
 

@@ -48,6 +48,16 @@ namespace sc2_bot {
 			action_reset_worker.score += action_reset_worker.score_modificator;
 		}
 		
+		virtual void OnUnitCreated(const sc2::Unit* unit) final {
+			if (unit->unit_type.ToType() == sc2::UNIT_TYPEID::TERRAN_MARINE) {
+				if (Observation()->GetUnits(sc2::Unit::Alliance::Self, sc2::IsUnit(sc2::UNIT_TYPEID::TERRAN_MARINE)).size() >= 10)
+				{
+					Action& action_attack = actions_available_.at(sc2_bot::ActionName::ATTACK);
+					action_attack.score += action_attack.score_modificator;
+				}
+			}
+		}
+
 		virtual void OnGameEnd() final {
 			std::cout << "The game is over." << std::endl;
 			Action action = actions_available_.find(sc2_bot::ActionName::GAME_END)->second;

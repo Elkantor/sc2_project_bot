@@ -40,20 +40,6 @@ namespace sc2_bot {
 		const sc2::ObservationInterface* observation_;
 	};
 
-namespace thread_events {
-
-	/********************/
-	/* Thread functions */
-	/********************/
-
-	void BuildingSupplyDepot(const sc2_bot::Bot& bot, const sc2::Unit* unit) {
-		std::this_thread::sleep_for(std::chrono::seconds(6));
-		while (unit->orders.at(0).ability_id != sc2::ABILITY_ID::BUILD_SUPPLYDEPOT) {}
-		while (unit->build_progress < 1.1f) {}
-		std::cout << "Supply depot is correclty builded." << std::endl;
-	}
-}// namespace thread_events
-	
 namespace functions{
 
 	/*******************************************/
@@ -63,7 +49,7 @@ namespace functions{
 	sc2::Point2D GetRandomLocationNextUnit(const sc2_bot::Bot& bot, const sc2::Unit* unit) {
 		float rx = sc2::GetRandomScalar();
 		float ry = sc2::GetRandomScalar();
-		sc2::Point2D location = sc2::Point2D(unit->pos.x + rx * 15, unit->pos.y + ry * 15);
+		sc2::Point2D location = sc2::Point2D(unit->pos.x + rx * 10, unit->pos.y + ry * 10);
 		return location;
 	}
 
@@ -242,14 +228,22 @@ namespace functions{
 
 	bool TryBuildMarine(sc2::AbilityID ability_type_for_structure, sc2::UnitTypeID unit_type,sc2_bot::Bot& bot) {
 		sc2::Units barracks = bot.Observation()->GetUnits(sc2::Unit::Alliance::Self, sc2::IsUnit(sc2::UNIT_TYPEID::TERRAN_BARRACKS));
-
+		if (barracks[0]->orders.size() >= 5) {
+			return false;
+		}
 		bot.Actions()->UnitCommand(barracks[0], ability_type_for_structure);
-		/*if (ability_type_for_structure == sc2::ABILITY_ID::TRAIN_MARINE) {
-			return TryBuildUnit(sc2::ABILITY_ID::TRAIN_SCV, sc2::UNIT_TYPEID::TERRAN_BARRACKS,bot);
-			//std::thread(sc2_bot::thread_events::BuildingSupplyDepot, bot, unit).detach();
-			//bot.worker_building_structure_.emplace_back(unit);
-		}*/
 
+		return true;
+	}
+
+	bool TryAttack(sc2::Units army, sc2_bot::Bot& bot) {
+		const sc2::GameInfo& game_info = bot.Observation()->GetGameInfo();
+		std::vector<sc2::Point2D> enemy_base_locations = game_info.enemy_start_locations;
+		for (sc2::Point2D enemy_base : enemy_base_locations) {
+			for (const sc2::Unit* unit : army) {
+				bot.Actions()->UnitCommand(unit, sc2::ABILITY_ID::ATTACK_ATTACK, enemy_base);
+			}
+		}
 		return true;
 	}
 
