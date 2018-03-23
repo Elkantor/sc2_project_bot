@@ -133,7 +133,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\SC2API_Binary_vs2017\include\QuadTree.h" />
     <ClInclude Include="..\include\bot\sc2_bot_agent.h" />
     <ClInclude Include="..\include\bot\common.h" />
     <ClInclude Include="..\include\bot\sc2_bot_actions.h" />
@@ -141,7 +140,6 @@
     <ClInclude Include="..\include\bot\sc2_bot_scoring.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\SC2API_Binary_vs2017\project\QuadTree.cpp" />
     <ClCompile Include="..\src\main.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

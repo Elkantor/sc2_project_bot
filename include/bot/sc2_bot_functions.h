@@ -49,7 +49,7 @@ namespace thread_events {
 	void BuildingSupplyDepot(const sc2_bot::Bot& bot, const sc2::Unit* unit) {
 		std::this_thread::sleep_for(std::chrono::seconds(6));
 		while (unit->orders.at(0).ability_id != sc2::ABILITY_ID::BUILD_SUPPLYDEPOT) {}
-		while (unit->build_progress < 1.0f) {}
+		while (unit->build_progress < 1.1f) {}
 		std::cout << "Supply depot is correclty builded." << std::endl;
 	}
 }// namespace thread_events
@@ -171,26 +171,36 @@ namespace functions{
 		}
 		if (build_ready) {
 			bot.Actions()->UnitCommand(unit, ability_type_for_structure, build_location);
-			if (ability_type_for_structure == sc2::ABILITY_ID::BUILD_SUPPLYDEPOT) {
-				std::thread(sc2_bot::thread_events::BuildingSupplyDepot, bot, unit).detach();
-				bot.worker_building_structure_.emplace_back(unit);
+			//std::thread(sc2_bot::thread_events::BuildingSupplyDepot, bot, unit).detach();
+			std::cout << "Adding unit to idle" << std::endl;
+			bot.worker_Idle.push_back(unit);
+
+			return true;
+		}
+		return false;
+	}
+
+		bool TryHarvest(sc2_bot::Bot& bot, const sc2::Unit* unit) {
+			const sc2::Unit* mineral_patch = FindNearestMineralPatch(unit->pos, bot.Observation());
+			if (!mineral_patch) {
+				return false;
 			}
-			return true;
-		}
-		return false;
-	}
+			else {
+				bot.Actions()->UnitCommand(unit, sc2::ABILITY_ID::HARVEST_GATHER, mineral_patch);
+				return true;
+			}
 
-	bool TryHarvest(sc2_bot::Bot& bot, const sc2::Unit* unit) {
-		const sc2::Unit* mineral_patch = FindNearestMineralPatch(unit->pos, bot.Observation());
-		if (mineral_patch != nullptr) {
-			bot.Actions()->UnitCommand(unit, sc2::ABILITY_ID::HARVEST_GATHER, mineral_patch->pos);
-			return true;
 		}
 
-		return false;
-	}
-
-	bool TryBuildUnit(sc2::AbilityID ability_type_for_unit, sc2::UnitTypeID unit_type) {
+	bool TryBuildUnit(sc2::AbilityID ability_type_for_unit, sc2::UnitTypeID unit_type, sc2_bot::Bot& bot) {
+		/*const sc2::ObservationInterface* observation = bot.Observation();
+		sc2::Units bases = observation->GetUnits(sc2::Unit::Alliance::Self, sc2_bot::IsTownHall());
+		
+		for (const auto& base : bases) {
+			if (base->unit_type == sc2::UNIT_TYPEID::TERRAN_BARRACKS && base->energy > 50) {
+				bot.Actions()->UnitCommand(base, sc2::ABILITY_ID::TRAIN_MARINE);
+			}
+		}*/
 		return false;
 	}
 
@@ -223,15 +233,24 @@ namespace functions{
 			//if there is a base with less than ideal workers
 			if (base->assigned_harvesters < base->ideal_harvesters && base->build_progress == 1) {
 				if (observation->GetMinerals() >= 50) {
-					return TryBuildUnit(sc2::ABILITY_ID::TRAIN_SCV, base->unit_type);
+					return TryBuildUnit(sc2::ABILITY_ID::TRAIN_SCV, base->unit_type,bot);
 				}
 			}
 		}
 		return false;;
 	}
 
-	bool TryBuildMarine() {
-		return false;
+	bool TryBuildMarine(sc2::AbilityID ability_type_for_structure, sc2::UnitTypeID unit_type,sc2_bot::Bot& bot) {
+		sc2::Units barracks = bot.Observation()->GetUnits(sc2::Unit::Alliance::Self, sc2::IsUnit(sc2::UNIT_TYPEID::TERRAN_BARRACKS));
+
+		bot.Actions()->UnitCommand(barracks[0], ability_type_for_structure);
+		/*if (ability_type_for_structure == sc2::ABILITY_ID::TRAIN_MARINE) {
+			return TryBuildUnit(sc2::ABILITY_ID::TRAIN_SCV, sc2::UNIT_TYPEID::TERRAN_BARRACKS,bot);
+			//std::thread(sc2_bot::thread_events::BuildingSupplyDepot, bot, unit).detach();
+			//bot.worker_building_structure_.emplace_back(unit);
+		}*/
+
+		return true;
 	}
 
 	size_t CountUnitType(const sc2::ObservationInterface* observation, sc2::UnitTypeID unit_type) {

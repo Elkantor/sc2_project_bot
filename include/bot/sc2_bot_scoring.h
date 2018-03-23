@@ -10,6 +10,8 @@ namespace sc2_bot {
 		BUILD_SCV,
 		BUILD_BARRACKS,
 		BUILD_SUPPLY_DEPOT,
+		BUILD_MARINE,
+		RESERT_WORKER,
 		MINE
 	};
 

@@ -28,7 +28,7 @@ int main(int argc, char* argv[]) {
 	}
 
 	if (!sc2_bot::CheckActionExists(actions_available, sc2_bot::ActionName::MINE)) {
-		int score = 90;
+		int score = 60;
 		int score_modificator = 5;
 		actions_available.insert(std::pair<sc2_bot::ActionName, sc2_bot::Action>(
 			sc2_bot::ActionName::MINE, 
@@ -41,7 +41,7 @@ int main(int argc, char* argv[]) {
 	}
 
 	if (!sc2_bot::CheckActionExists(actions_available, sc2_bot::ActionName::BUILD_SUPPLY_DEPOT)) {
-		int score = 51;
+		int score = 55;
 		int score_modificator = 5;
 		actions_available.insert(std::pair<sc2_bot::ActionName, sc2_bot::Action>(
 			sc2_bot::ActionName::BUILD_SUPPLY_DEPOT,
@@ -66,6 +66,31 @@ int main(int argc, char* argv[]) {
 		));
 	}
 	
+	if (!sc2_bot::CheckActionExists(actions_available, sc2_bot::ActionName::RESERT_WORKER)) {
+		int score = 5;
+		int score_modificator = 95;
+		actions_available.insert(std::pair<sc2_bot::ActionName, sc2_bot::Action>(
+			sc2_bot::ActionName::RESERT_WORKER,
+			sc2_bot::Action{
+				score,
+				score_modificator,
+				sc2_bot::actions::function_reset_worker
+			}
+		));
+	}
+
+	if (!sc2_bot::CheckActionExists(actions_available, sc2_bot::ActionName::BUILD_MARINE)) {
+		int score = 10;
+		int score_modificator = 10;
+		actions_available.insert(std::pair<sc2_bot::ActionName, sc2_bot::Action>(
+			sc2_bot::ActionName::BUILD_MARINE,
+			sc2_bot::Action { 
+				score, 
+				score_modificator, 
+				sc2_bot::actions::function_build_marine
+			}
+		));
+	}
 
 	/************************************************/
 	/* Create the AI Bot Agent (the global manager) */

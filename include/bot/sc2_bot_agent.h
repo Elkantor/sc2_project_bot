@@ -19,7 +19,7 @@ namespace sc2_bot {
 		sc2::Point3D staging_location_;
 		std::vector<sc2::Point3D> expansions_;
 		std::map<sc2_bot::ActionName, sc2_bot::Action> actions_available_;
-		std::vector<const sc2::Unit*> worker_building_structure_;
+		std::vector<const sc2::Unit*> worker_Idle;
 		int count_supply_depot_ = 0;
 
 
@@ -33,9 +33,21 @@ namespace sc2_bot {
 
 		virtual void OnStep() final {
 			sc2_bot::StartNextAction(actions_available_, *this);
-			std::cout << Observation()->GetMinerals() << std::endl;
 		}
 
+
+		virtual void OnBuildingConstructionComplete(const sc2::Unit* unit) final {
+			switch (unit->unit_type.ToType()) {
+			case sc2::UNIT_TYPEID::TERRAN_BARRACKS : {
+					Action& action_marine = actions_available_.at(sc2_bot::ActionName::BUILD_MARINE);
+					action_marine.score += 50;
+					break;
+				}
+			}
+			Action& action_reset_worker = actions_available_.at(sc2_bot::ActionName::RESERT_WORKER);
+			action_reset_worker.score += action_reset_worker.score_modificator;
+		}
+		
 		virtual void OnGameEnd() final {
 			std::cout << "The game is over." << std::endl;
 			Action action = actions_available_.find(sc2_bot::ActionName::GAME_END)->second;
